@@ -1,0 +1,7 @@
+mnemonic 
+web3
+numpy
+typing
+eth-keys
+eth_utils
+hashlib
