@@ -2,6 +2,7 @@ from web3 import Web3
 from typing import Dict
 import requests
 import json
+from ..utils.ABI import ABI
 
 
 class NetworkService:
@@ -11,6 +12,7 @@ class NetworkService:
         self.__web3 = web3
         self.__contractAddress = contractAddress
         self.__apiKey = apiKey
+        self.__contract = self.__web3.eth.contract(address=self.__contractAddress, abi=ABI.ERC20Balance())
 
 
     def getBlockInformation(self, blockNumber: int) -> Dict:
@@ -28,7 +30,6 @@ class NetworkService:
 
         response = requests.get(url)
         result = json.loads(response.text)
-        # result = response.json()                      # it migth be a better option here but dunno, needs to be checked 
         if response.status_code != 200:
             result['error'] = "Error while fetching data from Polygonscan."
         else:
@@ -41,13 +42,25 @@ class NetworkService:
         
         
     def getEstimatedGas(self, from_address: str, to_address: str, amount: str) -> Dict:
+        
+        amountInWei = Web3.to_wei(amount, 'ether')
+        data = self.__contract.encodeABI(fn_name='transfer', args=[to_address, amountInWei])
+    
         transaction = {
             'from': from_address,
-            'to': to_address,
-            'amount': amount
+            'to': self.__contractAddress,
+            'data': data
         }
-        
-        estimated_gas = self.__web3.eth.estimateGas(transaction)
+
+        try:
+            estimated_gas = self.__web3.eth.estimateGas(transaction)
+
+        except Exception as e:
+            result = {'error': str(e)}
+
+        if 'error' in result:
+            return result
+    
         result = {
             'estimateGas': {
                 'WEI': str(estimated_gas),
