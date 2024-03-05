@@ -1,5 +1,5 @@
 from web3 import Web3
-from web3.contract import contract
+from web3.contract import Contract
 from ..services.WalletService import WalletService
 from ..services.NetworkService import NetworkService
 from ..utils.ABI import ABI
@@ -10,8 +10,7 @@ class TransactionService:
         self.contract_address = contract_address
         self.wallet_service = wallet_service
         self.network_service = network_service
-        self.contract = contract(self.web3.provider, ABI.ERC20Balance())
-        self.contract.at(self.contract_address)
+        self.contract = self.web3.eth.contract(address=contract_address, abi=ABI.ERC20Balance())
         self.api_key = api_key
     
     '''
@@ -25,7 +24,7 @@ class TransactionService:
     '''
     def send_transaction(self, private_key: str, _from: str, _to: str, amount: str):
         status = {}
-        data = '0x' + self.contract.encodeABI(fn_name='transfer', args=[_to, self.web3.toHex(amount)])
+        data = '0x' + self.contract.encodeABI(fn_name='transfer', args=[_to, amount])
 
         wallet_info = self.wallet_service.getInformation(_from)
         if 'error' in wallet_info.get('nonce', {}):

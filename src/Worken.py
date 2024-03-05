@@ -1,6 +1,8 @@
 
 from .services.WalletService import WalletService
 from .services.NetworkService import NetworkService
+from .services.ContractService import ContractService
+from .services.TransactionService import TransactionService
 from web3 import Web3
 from os import getenv
 from dotenv import load_dotenv
@@ -14,6 +16,9 @@ class Worken:
         self.__nodeUrl = "https://rpc-mumbai.maticvigil.com/"
         self.__apiKey = getenv("WORKEN_POLYGONSCAN_APIKEY")
         self.__web3 = Web3(Web3.HTTPProvider(self.__nodeUrl))
+        self.__wallet = "0xf68A2B061c1aFC3ed07FafF33c53978F80F54099"
         
         self.wallet = WalletService(self.__web3, self.__contractAddress, self.__apiKey)
         self.network = NetworkService(self.__web3, self.__contractAddress, self.__apiKey)
+        self.contract = ContractService(self.__web3, self.__contractAddress, self.__apiKey)
+        self.transaction = TransactionService(self.__web3, self.__wallet, self.network, self.__contractAddress, self.__apiKey)

@@ -15,11 +15,17 @@ class ContractService:
         
         data = response.json()
         if data['status'] == '1':
-            code = data['result'][0]['bytecode']
-            if code != '0x':
-                result['status'] = True
+            if 'result' in data and len(data['result']) > 0:
+                code = data['result'][0].get('bytecode')
+                if code and code != '0x':
+                    result['status'] = True
+                else:
+                    result['status'] = False
             else:
-                result['status'] = False
+                result['error'] = "No contract information found in the response."
+        else:
+            result['error'] = "Status is not 1."
+        
         return result
     
     def get_contract_function(self):
